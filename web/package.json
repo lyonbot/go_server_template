@@ -1,0 +1,42 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "NODE_ENV=production rsbuild build",
+    "postbuild": "node ./scripts/publish-to-cdn.js",
+    "watch": "rsbuild build --watch",
+    "dev": "rsbuild dev --open",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "@unocss/reset": "66.1.0-beta.5",
+    "lodash-es": "^4.17.21",
+    "vue": "^3.5.13"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE > 0",
+    "not op_mini all",
+    "ios >= 12",
+    "android >= 8"
+  ],
+  "devDependencies": {
+    "@iconify-json/mdi": "^1.2.3",
+    "@rsbuild/core": "^1.2.8",
+    "@rsbuild/plugin-sass": "^1.2.2",
+    "@rsbuild/plugin-vue": "^1.0.5",
+    "@unocss/postcss": "66.1.0-beta.3",
+    "ali-oss": "^6.22.0",
+    "js-yaml": "^4.1.0",
+    "oxlint": "^0.15.15",
+    "postcss-import": "^16.1.0",
+    "postcss-preset-env": "^10.1.5",
+    "postcss-px-to-viewport": "^1.1.1",
+    "tiny-glob": "^0.2.9",
+    "typescript": "^5.7.3",
+    "unocss": "66.1.0-beta.3"
+  }
+}

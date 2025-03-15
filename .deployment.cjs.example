@@ -1,0 +1,38 @@
+
+const serviceName = 'my_app'    // apply to pm2
+const sshHost = 'yon@yons.site'
+const serverAppDir = '/home/yon/my_app'
+
+// web 部署配置
+exports.web = {
+  publicPath: 'https://xxx.oss.yons.site/my_app/',  // optional
+  cdn: {  // optional
+    cdnDest: 'my_app',
+    ossConfig: {
+      accessKeyId: 'xxxx',
+      accessKeySecret: 'xxxx',
+      region: 'oss-cn-shenzhen',
+      bucket: 'xxxx',
+    },
+  },
+  rsync: {  // optional
+    destination: `${sshHost}:/var/www/html/my_app/my_app/`,
+  },
+}
+
+// go 构建和部署机器
+exports.go = {
+  build: {
+    host: sshHost,
+    appDir: serverAppDir,
+    gitDir: `${serverAppDir}/source`,
+  }
+}
+
+exports.setupGoEnv = function () {
+  const { go } = exports
+  console.log(`export SERVICE_NAME=${serviceName}`)
+  console.log(`export DEST_HOST=${go.build.host}`)
+  console.log(`export APP_DIR=${go.build.appDir}`)
+  console.log(`export SOURCE_DIR=${go.build.gitDir}`)
+}
