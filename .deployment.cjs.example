@@ -22,6 +22,7 @@ exports.web = {
 exports.printGoEnv = function (deployType = 'test') {
   var SERVICE_NAME = "my_app"
   var DEST_HOST = "user@some.ssh.host"
+
   var DEPLOY_FILE_DIR = "deploy/test"   // files to apply
 
   switch (deployType) {

@@ -91,7 +91,32 @@ git merge staging
 git branch -D staging
 go build -ldflags "-s -w" -tags release -o $APP_DIR/main ./cmd/main
 cp -r $DEPLOY_FILE_DIR/* $APP_DIR/
-sed -i -e "s/SERVICE_NAME/$SERVICE_NAME/g" $APP_DIR/ecosystem.config.js
+
+node -e '
+const fs = require("fs");
+const { SERVICE_NAME, APP_DIR } = process.env;
+
+var pm2configPath = `${APP_DIR}/ecosystem.config.js`;
+var content = fs.readFileSync(pm2configPath, "utf8");
+
+content = content.replace(/SERVICE_NAME/g, SERVICE_NAME);
+content = content.replace(/\/\*+ @import:\s*(\S+)\s*\*\//g, (_, envFilePath) => {
+  var envFileContent = fs.readFileSync(envFilePath, "utf8");
+  var output = [_];
+  envFileContent.split("\n").forEach(line => {
+    line = line.trim();
+    if (!line.startsWith("#") && line.contains("=")) {
+      var idx = line.indexOf("=");
+      var key = line.substring(0, idx).trim();
+      var value = line.substring(idx + 1).trim();
+      output.push(`      ${JSON.stringify(key)}: ${JSON.stringify(value)},`);
+    }
+  });
+  return output.join("\n");
+});
+
+fs.writeFileSync(pm2configPath, content);
+'
 
 # 确保构建成功
 if [ $? -ne 0 ]; then

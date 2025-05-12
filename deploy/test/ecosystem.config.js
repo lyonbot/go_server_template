@@ -6,6 +6,7 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       GIN_MODE: 'release',
+      /* @import: .env.production */
     },
     watch: false,
     // watch: ['./main'],
