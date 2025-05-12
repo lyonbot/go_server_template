@@ -92,7 +92,7 @@ git branch -D staging
 go build -ldflags "-s -w" -tags release -o $APP_DIR/main ./cmd/main
 cp -r $DEPLOY_FILE_DIR/* $APP_DIR/
 
-node -e '
+(cd $APP_DIR && node -e '
 const fs = require("fs");
 const { SERVICE_NAME, APP_DIR } = process.env;
 
@@ -105,7 +105,7 @@ content = content.replace(/\/\*+ @import:\s*(\S+)\s*\*\//g, (_, envFilePath) => 
   var output = [_];
   envFileContent.split("\n").forEach(line => {
     line = line.trim();
-    if (!line.startsWith("#") && line.contains("=")) {
+    if (!line.startsWith("#") && line.includes("=")) {
       var idx = line.indexOf("=");
       var key = line.substring(0, idx).trim();
       var value = line.substring(idx + 1).trim();
@@ -116,7 +116,7 @@ content = content.replace(/\/\*+ @import:\s*(\S+)\s*\*\//g, (_, envFilePath) => 
 });
 
 fs.writeFileSync(pm2configPath, content);
-'
+')
 
 # 确保构建成功
 if [ $? -ne 0 ]; then
