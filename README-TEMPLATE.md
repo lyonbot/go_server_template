@@ -10,6 +10,9 @@
 cp deployment.cjs.example deployment.cjs
 cp .env.example .env
 
+# 修改 deployment.cjs
+# 修改 .env
+
 cp .env .env.production   # 注意：多 .env 不会合并
 ```
 

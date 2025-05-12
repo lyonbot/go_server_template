@@ -1,8 +1,4 @@
 
-const serviceName = 'my_app'    // apply to pm2
-const sshHost = 'yon@yons.site'
-const serverAppDir = '/home/yon/my_app'
-
 // web 部署配置
 exports.web = {
   publicPath: 'https://xxx.oss.yons.site/my_app/',  // optional
@@ -16,23 +12,37 @@ exports.web = {
     },
   },
   rsync: {  // optional
-    destination: `${sshHost}:/var/www/html/my_app/my_app/`,
+    // destination: `sshHost:/var/www/html/my_app/my_app/`,
   },
 }
 
-// go 构建和部署机器
-exports.go = {
-  build: {
-    host: sshHost,
-    appDir: serverAppDir,
-    gitDir: `${serverAppDir}/source`,
-  }
-}
+// 服务器部署
+// 部署的时候可以通过 sh deploy.sh <deployType> 来指定送哪里去
 
-exports.setupGoEnv = function () {
-  const { go } = exports
-  console.log(`export SERVICE_NAME=${serviceName}`)
-  console.log(`export DEST_HOST=${go.build.host}`)
-  console.log(`export APP_DIR=${go.build.appDir}`)
-  console.log(`export SOURCE_DIR=${go.build.gitDir}`)
+exports.printGoEnv = function (deployType = 'test') {
+  var SERVICE_NAME = "my_app"
+  var DEST_HOST = "user@some.ssh.host"
+  var DEPLOY_FILE_DIR = "deploy/test"   // files to apply
+
+  switch (deployType) {
+    case 'test':
+      break
+    case 'prod':
+      SERVICE_NAME = SERVICE_NAME + '_prod'
+      // DEPLOY_FILE_DIR = 'deploy/test'  // 暂时也用一样的吧
+      break
+    default:
+      console.log('Error: unknown deploy type ' + deployType)
+      process.exit(1)
+  }
+
+  var APP_DIR = `~/${SERVICE_NAME}`
+  var SOURCE_DIR = `${APP_DIR}/source`
+
+  // process.stdout.write(`export`)
+  process.stdout.write(` DEPLOY_FILE_DIR=${DEPLOY_FILE_DIR}`)
+  process.stdout.write(` SERVICE_NAME=${SERVICE_NAME}`)
+  process.stdout.write(` DEST_HOST=${DEST_HOST}`)
+  process.stdout.write(` APP_DIR=${APP_DIR}`)
+  process.stdout.write(` SOURCE_DIR=${SOURCE_DIR}`)
 }
