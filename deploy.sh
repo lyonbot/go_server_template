@@ -64,7 +64,7 @@ if ! $IS_ON_REMOTE; then
   # 开始构建
   (( $NO_WEB || npm run build:web ) && rsync -avL --delete ./web/dist ${DEST_HOST}:${SOURCE_DIR}/web/) &
 
-  git push $IS_FORCE ssh://${DEST_HOST}${SOURCE_DIR} HEAD:staging || {
+  git push $IS_FORCE ssh://${DEST_HOST}:${SOURCE_DIR} HEAD:staging || {
     wait
     echo "你可能需要先去服务器 mkdir -p $SOURCE_DIR && cd $SOURCE_DIR && git init" 1>&2
     exit 1

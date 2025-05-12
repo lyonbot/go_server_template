@@ -14,6 +14,7 @@ cp .env.example .env
 # 修改 .env
 
 cp .env .env.production   # 注意：多 .env 不会合并
+pnpm install
 ```
 
 远端的机器可能需要这些准备
@@ -43,7 +44,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 
 - PORT: 服务端口，例如：`8080`
 - JWT_SECRET: 用于生成 JWT 的密钥，例如：`50450000-dead-beef-1234-7ee4f3e70000`
-- REDIS_ADDR: Redis 地址，例如：`localhost:6379`
+- REDIS_ADDR: Redis 地址，例如：`127.0.0.1:6379`
 
 ### 一些工具
 
