@@ -55,7 +55,7 @@ if ! $IS_ON_REMOTE; then
 
   # 检查需要 copy 的环境变量文件
   # (根据 ecosystem.config.js 中的 @import: 注释来判断) 
-  env_files_to_copy=$(grep -Po '(?<=@import:)\s*\S+' ecosystem.config.js | sort | uniq)
+  env_files_to_copy=$(grep -Po '(?<=@import:)\s*\S+' $DEPLOY_FILE_DIR/ecosystem.config.js | sort | uniq)
   if [ -n "$env_files_to_copy" ]; then
     # 确保每一个环境变量都在 production 存在
     base_env_file_fields="$(awk 'match($0, /^[_A-Za-z0-9]+/){ print substr($0, RSTART, RLENGTH) }' .env)"
