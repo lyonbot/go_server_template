@@ -53,13 +53,23 @@ if ! $IS_ON_REMOTE; then
       exit 1
   fi
 
-  # 确保每一个环境变量都在 production 存在
-  awk 'match($0, /^[_A-Za-z0-9]+/){ print substr($0, RSTART, RLENGTH) }' .env | while read -r env; do
-    if ! grep -q "^$env=" .env.production; then
-      echo "Error: env $env is not declared in .env.production"
-      exit 1
-    fi
-  done
+  # 检查需要 copy 的环境变量文件
+  # (根据 ecosystem.config.js 中的 @import: 注释来判断) 
+  env_files_to_copy=$(grep -Po '(?<=@import:)\s*\S+' ecosystem.config.js | sort | uniq)
+  if [ -n "$env_files_to_copy" ]; then
+    # 确保每一个环境变量都在 production 存在
+    base_env_file_fields="$(awk 'match($0, /^[_A-Za-z0-9]+/){ print substr($0, RSTART, RLENGTH) }' .env)"
+    for env_file_name in $env_files_to_copy; do
+      for env_field_name in $base_env_file_fields; do
+        if ! grep -q "^$env_field_name=" $env_file_name; then
+          echo "Error: env $env_field_name is not declared in $env_file_name"
+          exit 1
+        fi
+      done
+    done
+    # 检查通过即可 rsync
+    rsync -avL ${env_files_to_copy} ${DEST_HOST}:${APP_DIR}/
+  fi
 
   # 开始构建
   (( $NO_WEB || npm run build:web ) && rsync -avL --delete ./web/dist ${DEST_HOST}:${SOURCE_DIR}/web/) &
@@ -69,7 +79,6 @@ if ! $IS_ON_REMOTE; then
     echo "你可能需要先去服务器 mkdir -p $SOURCE_DIR && cd $SOURCE_DIR && git init" 1>&2
     exit 1
   }
-  rsync -avL ./.env.production ${DEST_HOST}:${APP_DIR}/
 
   wait
 
@@ -90,39 +99,10 @@ echo "开始构建... $SERVICE_NAME"
 git merge staging
 git branch -D staging
 go build -ldflags "-s -w" -tags release -o $APP_DIR/main ./cmd/main
-cp -r $DEPLOY_FILE_DIR/* $APP_DIR/
+cp -L -r $DEPLOY_FILE_DIR/* $APP_DIR/
 
-(cd $APP_DIR && node -e '
-const fs = require("fs");
-const { SERVICE_NAME, APP_DIR } = process.env;
+cd $APP_DIR
+node $SOURCE_DIR/deploy/hooks/before-update-pm2.js
+pm2 reload ./ecosystem.config.js
 
-var pm2configPath = `${APP_DIR}/ecosystem.config.js`;
-var content = fs.readFileSync(pm2configPath, "utf8");
-
-content = content.replace(/SERVICE_NAME/g, SERVICE_NAME);
-content = content.replace(/\/\*+ @import:\s*(\S+)\s*\*\//g, (_, envFilePath) => {
-  var envFileContent = fs.readFileSync(envFilePath, "utf8");
-  var output = [_];
-  envFileContent.split("\n").forEach(line => {
-    line = line.trim();
-    if (!line.startsWith("#") && line.includes("=")) {
-      var idx = line.indexOf("=");
-      var key = line.substring(0, idx).trim();
-      var value = line.substring(idx + 1).trim();
-      output.push(`      ${JSON.stringify(key)}: ${JSON.stringify(value)},`);
-    }
-  });
-  return output.join("\n");
-});
-
-fs.writeFileSync(pm2configPath, content);
-')
-
-# 确保构建成功
-if [ $? -ne 0 ]; then
-    echo "构建失败"
-    exit 1
-fi
-
-cd $APP_DIR && pm2 reload ./ecosystem.config.js
 echo "部署完成"

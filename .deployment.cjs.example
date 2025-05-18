@@ -30,7 +30,7 @@ exports.printGoEnv = function (deployType = 'test') {
       break
     case 'prod':
       SERVICE_NAME = SERVICE_NAME + '_prod'
-      // DEPLOY_FILE_DIR = 'deploy/test'  // 暂时也用一样的吧
+      DEPLOY_FILE_DIR = 'deploy/prod'  // 注意 basedata 会不一样
       break
     default:
       console.log('Error: unknown deploy type ' + deployType)

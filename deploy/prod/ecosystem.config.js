@@ -7,7 +7,7 @@ module.exports = {
       GIN_MODE: 'release',
 
       // 导入环境变量文件
-      /* @import: .env.test */
+      /* @import: .env.production */
     },
     watch: false,
     // watch: ['./main'],
