@@ -71,8 +71,17 @@ if ! $IS_ON_REMOTE; then
     rsync -avL ${env_files_to_copy} ${DEST_HOST}:${APP_DIR}/
   fi
 
-  # 开始构建
-  (( $NO_WEB || npm run build:web ) && rsync -avL --delete ./web/dist ${DEST_HOST}:${SOURCE_DIR}/web/) &
+  # 构建web
+  build_web_if_needed() {
+    if $NO_WEB; then
+      echo "skipped: build web"
+    elif [ "$(ls -1t web | head -n 1)" = "dist" ]; then
+      echo "web/dist is already newest"
+    else
+      npm run build:web
+    fi
+  }
+  (build_web_if_needed && rsync -avL --delete ./web/dist ${DEST_HOST}:${SOURCE_DIR}/web/) &
 
   git push $IS_FORCE ssh://${DEST_HOST}/${SOURCE_DIR} HEAD:staging || {
     wait
